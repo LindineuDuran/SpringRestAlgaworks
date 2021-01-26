@@ -3,6 +3,8 @@ package com.lduran.osworks.api.controller;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,13 +46,13 @@ public class ClienteController
 
 	@PostMapping("/clientes")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Cliente adicionar(@RequestBody Cliente cliente)
+	public Cliente adicionar(@Valid @RequestBody Cliente cliente)
 	{		
 		return this.clienteRepository.save(cliente);
 	}
 
 	@PutMapping("/clientes/{clienteId}")
-	public ResponseEntity<Cliente> atualizar(@PathVariable Long clienteId, @RequestBody Cliente cliente)
+	public ResponseEntity<Cliente> atualizar(@Valid @PathVariable Long clienteId, @RequestBody Cliente cliente)
 	{
 		if(!this.clienteRepository.existsById(clienteId))
 		{
