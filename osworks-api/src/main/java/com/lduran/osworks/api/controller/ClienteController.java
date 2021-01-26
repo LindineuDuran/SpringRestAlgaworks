@@ -19,12 +19,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lduran.osworks.domain.model.Cliente;
 import com.lduran.osworks.domain.repository.ClienteRepository;
+import com.lduran.osworks.domain.service.CadastroClienteService;
 
 @RestController
 public class ClienteController
 {
 	@Autowired
 	private ClienteRepository clienteRepository;
+
+	@Autowired
+	private CadastroClienteService cadastroCliente;
 
 	@GetMapping("/clientes")
 	public List<Cliente> listar()
@@ -48,7 +52,7 @@ public class ClienteController
 	@ResponseStatus(HttpStatus.CREATED)
 	public Cliente adicionar(@Valid @RequestBody Cliente cliente)
 	{		
-		return this.clienteRepository.save(cliente);
+		return this.cadastroCliente.salvar(cliente);
 	}
 
 	@PutMapping("/clientes/{clienteId}")
@@ -60,7 +64,7 @@ public class ClienteController
 		}
 
 		cliente.setId(clienteId);
-		cliente = this.clienteRepository.save(cliente);
+		cliente = this.cadastroCliente.salvar(cliente);
 		return ResponseEntity.ok(cliente);
 	}
 
@@ -72,7 +76,7 @@ public class ClienteController
 			return ResponseEntity.notFound().build();
 		}
 
-		this.clienteRepository.deleteById(clienteId);
+		this.cadastroCliente.excluir(clienteId);
 
 		return ResponseEntity.noContent().build();
 	}
