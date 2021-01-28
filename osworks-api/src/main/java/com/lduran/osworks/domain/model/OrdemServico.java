@@ -1,7 +1,7 @@
 package com.lduran.osworks.domain.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -51,8 +51,8 @@ public class OrdemServico
 	private StatusOrdemServico status;
 
 	@JsonProperty(access = Access.READ_ONLY)
-	private LocalDateTime dataAbertura;
+	private OffsetDateTime dataAbertura;
 
 	@JsonProperty(access = Access.READ_ONLY)
-	private LocalDateTime dataFinalizacao;
+	private OffsetDateTime dataFinalizacao;
 }
