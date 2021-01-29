@@ -1,5 +1,6 @@
 drop table if exists ordem_servico;
 drop table if exists cliente;
+drop table if exists comentario;
 
 create table cliente
 (
