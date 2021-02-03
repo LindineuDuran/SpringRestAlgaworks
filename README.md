@@ -20,6 +20,9 @@ Desenvolvimento de uma Spring REST para Iniciantes
      <li>Documentando a API Spring Boot com o Swagger
           <ul>
                <li>O Swagger é uma aplicação open source que auxilia os desenvolvedores a definir, criar, documentar e consumir APIs REST;</li>
+	       <li>Customizando o Swagger na aplicação Spring Boot;</li>
+	       <li>Filtrando os endpoints da API Spring Boot no Swagger;</li>
+	       <li>Descrevendo a API no Swagger;;</li>
           </ul>
      </li>
 </ul>
