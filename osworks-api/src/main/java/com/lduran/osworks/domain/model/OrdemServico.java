@@ -38,7 +38,7 @@ public class OrdemServico
 	private BigDecimal preco;
 
 	@Enumerated(EnumType.STRING)
-	private StatusOrdemServico status;
+	StatusOrdemServico status;
 
 	private OffsetDateTime dataAbertura;
 
@@ -46,11 +46,6 @@ public class OrdemServico
 
 	@OneToMany(mappedBy = "ordemServico")
 	private List<Comentario> comentarios = new ArrayList<>();
-
-	private boolean podeSerFinalizada()
-	{
-		return StatusOrdemServico.ABERTA.equals(this.getStatus());
-	}
 
 	private boolean naoPodeSerFinalizada()
 	{

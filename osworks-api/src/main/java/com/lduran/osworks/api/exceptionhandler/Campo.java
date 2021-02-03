@@ -9,6 +9,6 @@ import lombok.Setter;
 @NoArgsConstructor @AllArgsConstructor
 public class Campo
 {
-	public String nome;
-	public String mensagem;
+	private String nome;
+	private String mensagem;
 }

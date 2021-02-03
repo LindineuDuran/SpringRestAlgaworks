@@ -14,8 +14,8 @@ public class OrdemServicoModel
 	private Long id;
 	private ClienteResumoModel cliente;
 	private String descricao;
-	private StatusOrdemServico status;
 	private BigDecimal preco;
+	StatusOrdemServico status;
 	private OffsetDateTime dataAbertura;
 	private OffsetDateTime dataFinalizacao;
 }

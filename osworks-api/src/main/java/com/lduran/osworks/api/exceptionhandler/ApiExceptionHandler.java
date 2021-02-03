@@ -3,9 +3,6 @@ package com.lduran.osworks.api.exceptionhandler;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,17 +14,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.lduran.osworks.domain.exception.EntidadeNãoEncontradaException;
+import com.lduran.osworks.domain.exception.EntidadeNaoEncontradaException;
 import com.lduran.osworks.domain.exception.NegocioException;
 
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler
 {
-	@Autowired
-	private MessageSource messageSource;
-
-	@ExceptionHandler(EntidadeNãoEncontradaException.class)
-	public ResponseEntity<Object> handleNegocio(EntidadeNãoEncontradaException ex, WebRequest request)
+	@ExceptionHandler(EntidadeNaoEncontradaException.class)
+	protected ResponseEntity<Object> handleEntidadeNãoEncontrada(EntidadeNaoEncontradaException ex, WebRequest request)
 	{
 		var status = HttpStatus.NOT_FOUND;
 
@@ -40,7 +34,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler
 	}
 
 	@ExceptionHandler(NegocioException.class)
-	public ResponseEntity<Object> handleNegocio(NegocioException ex, WebRequest request)
+	protected ResponseEntity<Object> handleNegocio(NegocioException ex, WebRequest request)
 	{
 		var status = HttpStatus.BAD_REQUEST;
 
@@ -58,20 +52,20 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler
 	{
 		var campos = new ArrayList<Campo>();
 
-		for(ObjectError error : ex.getBindingResult().getAllErrors())
+		for(ObjectError error: ex.getBindingResult().getAllErrors())
 		{
 			String nome = ((FieldError)error).getField();
-			String mensagem = this.messageSource.getMessage(error,LocaleContextHolder.getLocale());
+			String mensagem = error.getDefaultMessage();
 
-			campos.add(new Campo(nome,mensagem));
+			campos.add(new Campo(nome, mensagem));
 		}
 
 		var problema = new Problema();
 
 		problema.setStatus(status.value());
 
-		problema.setTitulo("Um ou mais campos estão inválidos. " +
-				"Faça o preenchimento correto e tente novamente.");
+		problema.setTitulo("Um ou mais campos estão inválidos. "
+				+ "Faça o preenchimento correto e tente novamente.");
 
 		problema.setDataHora(OffsetDateTime.now());
 
