@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lduran.osworks.api.model.OrdemServicoInput;
 import com.lduran.osworks.api.model.OrdemServicoModel;
 import com.lduran.osworks.domain.model.OrdemServico;
-import com.lduran.osworks.domain.repository.OrdermServicoRepository;
+import com.lduran.osworks.domain.repository.OrdemServicoRepository;
 import com.lduran.osworks.domain.service.GestaoOrdemServicoService;
 
 import io.swagger.annotations.ApiOperation;
@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiResponses;
 public class OrdemServicoController
 {
 	@Autowired
-	private OrdermServicoRepository ordemServicoRepository;
+	private OrdemServicoRepository ordemServicoRepository;
 
 	@Autowired
 	private GestaoOrdemServicoService gestaoOrdemServicoService;
@@ -53,8 +53,8 @@ public class OrdemServicoController
 	@RequestMapping(value = "/{ordemServicoId}", method = RequestMethod.GET, produces = "application/json")
 	public ResponseEntity<OrdemServicoModel> buscar(@PathVariable Long ordemServicoId)
 	{
-		Optional<OrdemServico> ordemServico= this.ordemServicoRepository.findById(ordemServicoId);
-		if(ordemServico.isPresent())
+		Optional<OrdemServico> ordemServico = this.ordemServicoRepository.findById(ordemServicoId);
+		if (ordemServico.isPresent())
 		{
 			OrdemServicoModel ordemServicoModel = this.toModel(ordemServico.get());
 			return ResponseEntity.ok(ordemServicoModel);
@@ -63,9 +63,18 @@ public class OrdemServicoController
 		return ResponseEntity.notFound().build();
 	}
 
+	@ApiOperation(value = "Retorna uma lista de ordens de serviço pelo id do cliente")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Retorna uma lista de ordens de serviço pelo id do cliente") })
+	@RequestMapping(value = "/buscando-por-cliente-id/{clienteId}", method = RequestMethod.GET, produces = "application/json")
+	public List<OrdemServicoModel> buscarPorCLienteId(@PathVariable Long clienteId)
+	{
+		return this.toCollectionModel(this.gestaoOrdemServicoService.findOrdemServicoByClienteId(clienteId));
+	}
+
 	@ApiOperation(value = "Cadastra uma nova ordem de serviço")
 	@ApiResponses(value = { @ApiResponse(code = 201, message = "Cadastra uma nova ordem de serviço") })
-	@RequestMapping(method = RequestMethod.POST, produces = "application/json", consumes = "application/json")	
+	@RequestMapping(method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseStatus(HttpStatus.CREATED)
 	public OrdemServicoModel criar(@Valid @RequestBody OrdemServicoInput ordemServicoInput)
 	{
@@ -85,7 +94,7 @@ public class OrdemServicoController
 	@RequestMapping(value = "/{ordemServicoId}", method = RequestMethod.DELETE, produces = "application/json", consumes = "application/json")
 	public ResponseEntity<Void> remover(@PathVariable Long ordemServicoId)
 	{
-		if(!this.ordemServicoRepository.existsById(ordemServicoId))
+		if (!this.ordemServicoRepository.existsById(ordemServicoId))
 		{
 			return ResponseEntity.notFound().build();
 		}
@@ -102,9 +111,7 @@ public class OrdemServicoController
 
 	private List<OrdemServicoModel> toCollectionModel(List<OrdemServico> ordensServico)
 	{
-		return ordensServico.stream()
-				.map(ordemServico -> this.toModel(ordemServico))
-				.collect(Collectors.toList());
+		return ordensServico.stream().map(ordemServico -> this.toModel(ordemServico)).collect(Collectors.toList());
 	}
 
 	private OrdemServico toEntity(OrdemServicoInput ordemServicoInput)

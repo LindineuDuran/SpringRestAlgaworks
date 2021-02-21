@@ -1,0 +1,13 @@
+// Creating a Custom Network to Connect MySQL and WebApplication
+docker network create mysqlNET
+
+// Baixar imagem do MySQL
+docker run --detach --restart=always --env MYSQL_ROOT_PASSWORD=VCK4AGzFOnc@ --env MYSQL_USER=root --env MYSQL_PASSWORD=VCK4AGzFOnc@ --env MYSQL_DATABASE=osworks --name mysql --publish 3306:3306 --network=mysqlNET --volume mysql-database-volume:/var/lib/mysql mysql:5.7
+
+docker run --detach --restart=always --env MYSQL_ROOT_PASSWORD=VCK4AGzFOnc@ --env MYSQL_USER=root --env MYSQL_PASSWORD=VCK4AGzFOnc@ --env MYSQL_DATABASE=osworks --name mysql_osworks --publish 3306:3306 --network=mysqlNET --volume mysql-database-volume:/var/lib/mysql mysql:5.7
+
+// Gerar imagem da API dentro Eclipse/Maven
+clean package -DskipTests
+
+// Gerar o Container da API
+docker container run -d --restart=always -p 8080:8080 --network=mysqlNET -e RDS_HOSTNAME=mysql_osworks lduran355/osworks-api:0.0.1-SNAPSHOT

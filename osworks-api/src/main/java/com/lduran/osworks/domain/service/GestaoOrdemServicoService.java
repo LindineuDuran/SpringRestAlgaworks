@@ -1,6 +1,8 @@
 package com.lduran.osworks.domain.service;
 
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,13 +15,13 @@ import com.lduran.osworks.domain.model.OrdemServico;
 import com.lduran.osworks.domain.model.StatusOrdemServico;
 import com.lduran.osworks.domain.repository.ClienteRepository;
 import com.lduran.osworks.domain.repository.ComentarioRepository;
-import com.lduran.osworks.domain.repository.OrdermServicoRepository;
+import com.lduran.osworks.domain.repository.OrdemServicoRepository;
 
 @Service
 public class GestaoOrdemServicoService
 {
 	@Autowired
-	private OrdermServicoRepository ordemServicoRepository;
+	private OrdemServicoRepository ordemServicoRepository;
 
 	@Autowired
 	private ClienteRepository clienteRepository;
@@ -29,8 +31,7 @@ public class GestaoOrdemServicoService
 
 	public OrdemServico criar(OrdemServico ordemServico)
 	{
-		Cliente cliente = this.clienteRepository.findById(ordemServico.getCliente().getId())
-				.orElseThrow(() -> new NegocioException("Cliente não encontrado."));
+		Cliente cliente = buscarCliente(ordemServico.getCliente().getId());
 
 		ordemServico.setCliente(cliente);
 		ordemServico.setStatus(StatusOrdemServico.ABERTA);
@@ -64,9 +65,25 @@ public class GestaoOrdemServicoService
 		return this.comentarioRepository.save(comentario);
 	}
 
+	public List<OrdemServico> findOrdemServicoByClienteId(Long clienteId)
+	{
+		Cliente cliente = buscarCliente(clienteId);
+
+		List<OrdemServico> ordensServico = this.ordemServicoRepository.findAll();
+
+		return ordensServico.stream().filter(ordemServico -> ordemServico.getCliente().equals(cliente))
+				.collect(Collectors.toList());
+	}
+
 	private OrdemServico buscar(Long ordemServicoId)
 	{
 		return this.ordemServicoRepository.findById(ordemServicoId)
 				.orElseThrow(() -> new EntidadeNaoEncontradaException("Ordem de Serviço não encontrada."));
+	}
+
+	private Cliente buscarCliente(Long clienteId)
+	{
+		return this.clienteRepository.findById(clienteId)
+				.orElseThrow(() -> new NegocioException("Cliente não encontrado."));
 	}
 }
