@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @RestController
+//@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:8081")
 @RequestMapping("/ordens-servico/{ordemServicoId}/comentarios")
 public class ComentarioController
 {
@@ -54,7 +57,7 @@ public class ComentarioController
 	public ResponseEntity<ComentarioModel> buscar(@PathVariable Long comentarioId)
 	{
 		Optional<Comentario> comentario = this.comentarioRepository.findById(comentarioId);
-		if(comentario.isPresent())
+		if (comentario.isPresent())
 		{
 			return ResponseEntity.ok(this.toModel(comentario.get()));
 		}
@@ -66,9 +69,11 @@ public class ComentarioController
 	@ApiResponses(value = { @ApiResponse(code = 201, message = "Comentário novo cadastrado") })
 	@RequestMapping(method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ComentarioModel adicionar(@PathVariable Long ordemServicoId, @Valid @RequestBody ComentarioInput comentarioInput)
-	{		
-		Comentario comentario = this.gestaoOrdemServicoService.adicionarComentario(ordemServicoId, comentarioInput.getDescricao());
+	public ComentarioModel adicionar(@PathVariable Long ordemServicoId,
+			@Valid @RequestBody ComentarioInput comentarioInput)
+	{
+		Comentario comentario = this.gestaoOrdemServicoService.adicionarComentario(ordemServicoId,
+				comentarioInput.getDescricao());
 		return this.toModel(comentario);
 	}
 
@@ -79,8 +84,6 @@ public class ComentarioController
 
 	private List<ComentarioModel> toCollectionModel(List<Comentario> comentarios)
 	{
-		return comentarios.stream()
-				.map(comentario -> this.toModel(comentario))
-				.collect(Collectors.toList());
+		return comentarios.stream().map(comentario -> this.toModel(comentario)).collect(Collectors.toList());
 	}
 }

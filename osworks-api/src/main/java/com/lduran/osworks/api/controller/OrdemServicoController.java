@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lduran.osworks.api.model.OrdemServicoInput;
 import com.lduran.osworks.api.model.OrdemServicoModel;
+import com.lduran.osworks.domain.model.Comentario;
 import com.lduran.osworks.domain.model.OrdemServico;
+import com.lduran.osworks.domain.repository.ComentarioRepository;
 import com.lduran.osworks.domain.repository.OrdemServicoRepository;
 import com.lduran.osworks.domain.service.GestaoOrdemServicoService;
 
@@ -28,11 +31,16 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @RestController
+//@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:8081")
 @RequestMapping("/ordens-servico")
 public class OrdemServicoController
 {
 	@Autowired
 	private OrdemServicoRepository ordemServicoRepository;
+
+	@Autowired
+	private ComentarioRepository comentarioRepository;
 
 	@Autowired
 	private GestaoOrdemServicoService gestaoOrdemServicoService;
@@ -82,21 +90,50 @@ public class OrdemServicoController
 		return this.toModel(this.gestaoOrdemServicoService.criar(ordemServico));
 	}
 
+	@ApiOperation(value = "Altera uma ordem de serviço")
+	@RequestMapping(value = "/{ordemServicoId}", method = RequestMethod.PUT, produces = "application/json", consumes = "application/json")
+	public ResponseEntity<OrdemServicoModel> atualizar(@Valid @PathVariable Long ordemServicoId,
+			@RequestBody OrdemServicoInput ordemServicoInput)
+	{
+		Optional<OrdemServico> ordemServico = this.ordemServicoRepository.findById(ordemServicoId);
+		if (ordemServico.isPresent())
+		{
+			OrdemServico ordemServicoNova = ordemServico.get();
+			ordemServicoNova.getCliente().setId(ordemServicoInput.getCliente().getId());
+			ordemServicoNova.setDescricao(ordemServicoInput.getDescricao());
+			ordemServicoNova.setPreco(ordemServicoInput.getPreco());
+			ordemServicoNova = this.ordemServicoRepository.save(ordemServicoNova);
+
+			return ResponseEntity.ok(this.toModel(ordemServicoNova));
+		}
+
+		return ResponseEntity.notFound().build();
+	}
+
 	@ApiOperation(value = "Finaliza uma ordem de serviço")
-	@RequestMapping(value = "/{ordemServicoId}/finalizacao", method = RequestMethod.PUT, produces = "application/json", consumes = "application/json")
+	@RequestMapping(value = "/{ordemServicoId}/finalizacao", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void finalizar(@PathVariable Long ordemServicoId)
 	{
 		this.gestaoOrdemServicoService.finalizar(ordemServicoId);
 	}
 
-	@ApiOperation(value = "Elimina um cliente")
-	@RequestMapping(value = "/{ordemServicoId}", method = RequestMethod.DELETE, produces = "application/json", consumes = "application/json")
+	@ApiOperation(value = "Elimina uma ordem de serviço")
+	@RequestMapping(value = "/{ordemServicoId}", method = RequestMethod.DELETE)
 	public ResponseEntity<Void> remover(@PathVariable Long ordemServicoId)
 	{
 		if (!this.ordemServicoRepository.existsById(ordemServicoId))
 		{
 			return ResponseEntity.notFound().build();
+		}
+
+		List<Comentario> comentarios = gestaoOrdemServicoService.findComentarioByOrdemServicoId(ordemServicoId);
+		if (comentarios != null)
+		{
+			comentarios.forEach(com ->
+			{
+				comentarioRepository.deleteById(com.getId());
+			});
 		}
 
 		this.gestaoOrdemServicoService.excluir(ordemServicoId);

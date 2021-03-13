@@ -75,6 +75,17 @@ public class GestaoOrdemServicoService
 				.collect(Collectors.toList());
 	}
 
+	public List<Comentario> findComentarioByOrdemServicoId(Long ordemServicoId)
+	{
+		OrdemServico ordemServico = this.ordemServicoRepository.findById(ordemServicoId)
+				.orElseThrow(() -> new NegocioException("Ordem de Servico não encontrada."));
+
+		List<Comentario> comentarios = this.comentarioRepository.findAll();
+
+		return comentarios.stream().filter(comentario -> comentario.getOrdemServico().equals(ordemServico))
+				.collect(Collectors.toList());
+	}
+
 	private OrdemServico buscar(Long ordemServicoId)
 	{
 		return this.ordemServicoRepository.findById(ordemServicoId)

@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,14 +18,20 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lduran.osworks.domain.model.Cliente;
+import com.lduran.osworks.domain.model.Comentario;
+import com.lduran.osworks.domain.model.OrdemServico;
 import com.lduran.osworks.domain.repository.ClienteRepository;
+import com.lduran.osworks.domain.repository.ComentarioRepository;
 import com.lduran.osworks.domain.service.CadastroClienteService;
+import com.lduran.osworks.domain.service.GestaoOrdemServicoService;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @RestController
+//@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:8081")
 @RequestMapping("/clientes")
 public class ClienteController
 {
@@ -32,7 +39,13 @@ public class ClienteController
 	private ClienteRepository clienteRepository;
 
 	@Autowired
+	private ComentarioRepository comentarioRepository;
+
+	@Autowired
 	private CadastroClienteService cadastroCliente;
+
+	@Autowired
+	private GestaoOrdemServicoService gestaoOrdemServicoService;
 
 	@ApiOperation(value = "Retorna uma lista de clientes")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Retorna a lista de clientes") })
@@ -48,7 +61,7 @@ public class ClienteController
 	public ResponseEntity<Cliente> buscar(@PathVariable Long clienteId)
 	{
 		Optional<Cliente> cliente = this.clienteRepository.findById(clienteId);
-		if(cliente.isPresent())
+		if (cliente.isPresent())
 		{
 			return ResponseEntity.ok(cliente.get());
 		}
@@ -90,7 +103,7 @@ public class ClienteController
 	@RequestMapping(value = "/{clienteId}", method = RequestMethod.PUT, produces = "application/json", consumes = "application/json")
 	public ResponseEntity<Cliente> atualizar(@Valid @PathVariable Long clienteId, @RequestBody Cliente cliente)
 	{
-		if(!this.clienteRepository.existsById(clienteId))
+		if (!this.clienteRepository.existsById(clienteId))
 		{
 			return ResponseEntity.notFound().build();
 		}
@@ -102,12 +115,31 @@ public class ClienteController
 	}
 
 	@ApiOperation(value = "Elimina um cliente")
-	@RequestMapping(value = "/{clienteId}", method = RequestMethod.DELETE, produces = "application/json", consumes = "application/json")
+	@RequestMapping(value = "/{clienteId}", method = RequestMethod.DELETE)
 	public ResponseEntity<Void> remover(@PathVariable Long clienteId)
 	{
 		if (!this.clienteRepository.existsById(clienteId))
 		{
 			return ResponseEntity.notFound().build();
+		}
+
+		List<OrdemServico> ordensServico = this.gestaoOrdemServicoService.findOrdemServicoByClienteId(clienteId);
+		if (ordensServico != null)
+		{
+			ordensServico.forEach(ordem ->
+			{
+				List<Comentario> comentarios = gestaoOrdemServicoService.findComentarioByOrdemServicoId(ordem.getId());
+				if (comentarios != null)
+				{
+					comentarios.forEach(com ->
+					{
+						comentarioRepository.deleteById(com.getId());
+					});
+				}
+
+				this.gestaoOrdemServicoService.excluir(ordem.getId());
+			});
+
 		}
 
 		this.cadastroCliente.excluir(clienteId);
