@@ -46,9 +46,13 @@ public class ComentarioController
 	@ApiOperation(value = "Retorna uma lista de comentários")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Retorna a lista de comentários") })
 	@RequestMapping(method = RequestMethod.GET, produces = "application/json")
-	public List<ComentarioModel> listar()
+	public List<ComentarioModel> listar(@PathVariable Long ordemServicoId)
 	{
-		return this.toCollectionModel(this.comentarioRepository.findAll());
+		List<Comentario> comentarios = this.comentarioRepository.findAll().stream()
+				.filter(comentario -> comentario.getOrdemServico().getId().equals(ordemServicoId))
+				.collect(Collectors.toList());
+
+		return this.toCollectionModel(comentarios);
 	}
 
 	@ApiOperation(value = "Busca um comentário")
