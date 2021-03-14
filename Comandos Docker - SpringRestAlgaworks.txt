@@ -11,3 +11,9 @@ clean package -DskipTests
 
 // Gerar o Container da API
 docker container run -d --restart=always -p 8080:8080 --network=mysqlNET -e RDS_HOSTNAME=mysql_osworks lduran355/osworks-api:0.0.1-SNAPSHOT
+
+// Gerar o Container do Front-end
+docker run -d --restart=always -p 8081:80 --network=mysqlNET lduran355/osworks-front-end
+
+// Executar o Docker Compose
+docker-compose up -d

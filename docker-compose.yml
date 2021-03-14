@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MYSQL_USER: root
+      MYSQL_PASSWORD: VCK4AGzFOnc@
+      MYSQL_ROOT_PASSWORD: VCK4AGzFOnc@
+      MYSQL_DATABASE: osworks
+    volumes: 
+      - mysql-database-data-volume:/var/lib/mysql
+    networks:
+      - mysqlNET
+
+  osworks-api:
+    image: lduran355/osworks-api:0.0.1-SNAPSHOT
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on: # Start the depends_on first
+      - mysql
+    environment:
+      RDS_HOSTNAME: mysql
+      RDS_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: VCK4AGzFOnc@
+      MYSQL_ROOT_PASSWORD: VCK4AGzFOnc@
+      MYSQL_DATABASE: osworks
+    networks:
+      - mysqlNET
+      
+  osworks-front-end:
+    image: lduran355/osworks-front-end:latest
+    container_name: osworks-front-end
+    depends_on: # Start the depends_on first
+      - osworks-api
+    networks:
+      - mysqlNET
+    ports:
+      - "8081:80"
+    restart: always
+
+# Volumes
+volumes: 
+  mysql-database-data-volume:
+  
+# Networks to be created to facilitate communication between containers
+networks:
+  mysqlNET:
