@@ -1,0 +1,33 @@
+<div class="row" >
+  <div class="col-sm-6" *ngIf="!submitted">
+    <div class="row">
+      <div class="mr-auto">
+        <app-titulo [titulo]="titulo"></app-titulo>
+      </div>
+    </div>
+
+    <form [formGroup]="ordemFormNovo">
+      <!-- <div class="form-group">
+        <label for="formGroupExampleInput">Nome do Cliente</label>
+        <input type="text" formControlName="nome" class="form-control">
+      </div> -->
+      <div class="form-group">
+        <label for="formGroupExampleInput2">Descrição</label>
+        <input type="text" formControlName="descricao"  class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="formGroupExampleInput2">Preço</label>
+        <input type="text" formControlName="preco" class="form-control">
+      </div>
+      <div class="form-group">
+        <hr>
+        <button class="btn btn-success" (click)="saveOrdem()">Enviar</button>
+        <button class="btn btn-danger" routerLink="/ordens-servico">Voltar</button>
+      </div>
+    </form>
+  </div>
+  <div *ngIf="submitted">
+     <h4>You submitted successfully!</h4>
+     <button class="btn btn-danger" routerLink="/clientes">Voltar</button>
+  </div>
+</div>

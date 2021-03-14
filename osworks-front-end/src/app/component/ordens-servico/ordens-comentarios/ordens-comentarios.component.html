@@ -1,0 +1,16 @@
+<table class="table table-hover">
+  <thead class="thead-light">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Descrição</th>
+      <th scope="col">Data de Envio</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let comentario of comentarios">
+      <th scope="row">{{comentario.id}}</th>
+      <td>{{comentario.descricao}}</td>
+      <td>{{comentario.dataEnvio}}</td>
+    </tr>
+  </tbody>
+</table>

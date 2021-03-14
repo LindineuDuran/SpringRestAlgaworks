@@ -1,0 +1,20 @@
+<table class="table table-hover">
+  <thead class="thead-light">
+    <tr>
+      <th> Visualizar</th>
+      <th scope="col">#</th>
+      <th scope="col">Descrição</th>
+      <th scope="col">Data de Abertura</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let ord of ordens">
+      <td>
+        <button (click)="ordemSelect(ord)" class="text-dark btn btn-sm btn-outline-warning">Detalhe</button>
+      </td>
+      <th scope="row">{{ord.id}}</th>
+      <td>{{ord.descricao}}</td>
+      <td>{{ord.dataAbertura}}</td>
+    </tr>
+  </tbody>
+</table>

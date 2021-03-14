@@ -1,0 +1,75 @@
+<div class="row">
+  <div class="col-sm-6" *ngIf="clienteSelecionado">
+    <div class="row">
+      <div class="mr-auto">
+        <app-titulo [titulo]="'Cód. Cliente: ' + clienteSelecionado.id"></app-titulo>
+      </div>
+      <div class="mt-1">
+        <button class="btn btn-sm btn-outline-danger" (click)="voltar()">Fechar</button>
+      </div>
+    </div>
+
+    <form [formGroup]="clienteForm">
+      <div class="form-group">
+        <label for="formGroupExampleInput">Nome</label>
+        <input type="text" formControlName="nome" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="formGroupExampleInput2">E-mail</label>
+        <input type="text" formControlName="email"  class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="formGroupExampleInput2">Telefone</label>
+        <input type="text" formControlName="telefone" class="form-control">
+      </div>
+      <div class="form-group">
+        <hr>
+        <button class="btn btn-success" (click)="saveCliente()" [disabled]="!clienteForm.valid">Enviar</button>
+        <button class="btn btn-primary" [routerLink]="['/ordem-servico-novo/', clienteSelecionado.id]" [disabled]="!clienteForm.valid">Nova Ordem de Serviço</button>
+      </div>
+    </form>
+  </div>
+
+  <div [ngClass]="{'col-sm-6': clienteSelecionado, 'col-sm-12': !clienteSelecionado}">
+    <app-titulo [titulo]="titulo"></app-titulo>
+
+    <table class="table table-hover">
+      <thead class="thead-light">
+        <tr>
+          <th scope="col">Visualizar</th>
+          <th scope="col">#</th>
+          <th scope="col">Nome Completo</th>
+          <th scope="col">telefone</th>
+          <th scope="col">Opções</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cliente of clientes">
+          <td><button (click)="clienteSelect(cliente.id)" class="text-dark btn btn-sm btn-outline-warning">Detalhe</button></td>
+          <td scope="row">{{cliente.id}}</td>
+          <td>{{cliente.nome}}</td>
+          <td>{{cliente.telefone}}</td>
+          <td>
+            <div class="btn-group">
+              <button (click)="openModal(template, cliente.id)" class="btn btn-sm btn-outline-primary">Ordens</button>
+              <button (click)="excluirCliente(cliente.id)" class="btn-outline-danger">Excluir</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <a class="m-1 btn btn-sm btn-primary" routerLink="/cliente-novo">Novo Cliente</a>
+  </div>
+</div>
+
+<ng-template #template>
+  <div class="modal-body">
+    <app-clientes-ordens (closeModal)="closeModal()" [ordens]="ordensClientes"></app-clientes-ordens>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn pull-right" aria-label="Close"
+      (click)="modalRef.hide()">
+      FECHAR
+    </button>
+  </div>
+</ng-template>

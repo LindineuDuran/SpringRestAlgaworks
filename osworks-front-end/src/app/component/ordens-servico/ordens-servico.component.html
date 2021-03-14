@@ -1,0 +1,45 @@
+<div>
+  <app-titulo [titulo]="titulo"></app-titulo>
+
+  <table class="table table-hover">
+    <thead class="thead-light">
+      <tr>
+        <th> Visualizar</th>
+        <th scope="col">#</th>
+        <th scope="col">Cliente</th>
+        <th scope="col">Descricao</th>
+        <th scope="col">Data de Abertura</th>
+        <th scope="col">Opções</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let ord of ordens">
+        <td>
+          <a [routerLink]="['/ordens-servico/', ord.id]" class="text-dark btn btn-sm btn-outline-warning">Detalhe</a>
+        </td>
+        <th scope="row">{{ord.id}}</th>
+        <td>{{ord.cliente.nome}}</td>
+        <td>{{ord.descricao}}</td>
+        <td>{{ord.dataAbertura}}</td>
+        <td>
+          <div class="btn-group">
+            <button (click)="openModal(template, ord.id)" class="btn btn-sm btn-outline-primary">Comentários</button>
+            <button (click)="excluirOrdem(ord.id)" class="btn-outline-danger">Excluir</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<ng-template #template>
+  <div class="modal-body">
+    <app-ordens-comentarios (closeModal)="closeModal()" [comentarios]="comentariosOrdens"></app-ordens-comentarios>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn pull-right" aria-label="Close"
+      (click)="modalRef.hide()">
+      FECHAR
+    </button>
+  </div>
+</ng-template>

@@ -1,0 +1,82 @@
+<div>
+  <div class="row">
+    <div class="mr-auto">
+      <app-titulo [titulo]="titulo"></app-titulo>
+    </div>
+  </div>
+  <form class="edit-form row g-3" *ngIf="ordemSelecionada">
+    <div class="col-md-12">
+      <button class="btn btn-warning" (click)="voltar()">Lista de Ordens</button>
+    </div>
+    <div class="form-group  col-md-6">
+      <label for="cliente" class="col-sm-1 col-form-label">Cliente</label>
+      <div class="col-sm-11">
+        <input type="text" class="form-control" value="{{ordemSelecionada.cliente.nome}}" name="cliente" readonly>
+      </div>
+    </div>
+    <div class="form-group  col-md-6">
+      <label for="descricao" class="col-sm-1 col-form-label">Descrição</label>
+      <div class="col-sm-11">
+        <input type="text" class="form-control" required [(ngModel)]="ordemSelecionada.descricao" name="descricao">
+      </div>
+    </div>
+    <div class="form-group  col-md-3">
+      <label for="preco" class="form-label">Preço</label>
+      <input type="text" class="form-control" required [(ngModel)]="ordemSelecionada.preco" name="preco">
+    </div>
+    <div class="form-group  col-md-3">
+      <label for="status" class="form-label">Status</label>
+      <input type="text" class="form-control"  value="{{ordemSelecionada.status}}" name="status" readonly>
+    </div>
+    <div class="form-group col-md-3">
+      <label class="form-label">Data de Abertura</label>
+      <input type="text" class="form-control" value="{{ordemSelecionada.dataAbertura}}" readonly>
+    </div>
+    <div class="form-group col-md-3">
+      <label class="form-label">Data de Finalização</label>
+      <input type="text" class="form-control" value="{{ordemSelecionada.dataFinalizacao}}" readonly>
+    </div>
+    <div class="col-12">
+      <button class="btn btn-success" (click)="saveOrdem()">Enviar</button>
+      <button class="btn btn-danger" (click)="openModal(template)">Comentário</button>
+      <button class="btn btn-primary" (click)="finalizarOrdem(ordemSelecionada)">Finalizar</button>
+    </div>
+    <div class="form-group">
+      <h4 for="formGroupExampleInput2">Comentário</h4>
+      <table class="table table-hover">
+        <thead class="thead-light">
+          <th scope="col">#</th>
+          <th scope="col">Descrição</th>
+          <th scope="col">Data de Envio</th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let comentario of comentariosOrdens">
+            <th scope="row">{{comentario.id}}</th>
+            <td>{{comentario.descricao}}</td>
+            <td>{{comentario.dataEnvio}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </form>
+</div>
+
+<ng-template #template>
+  <div class="modal-body">
+    <form [formGroup]="comentarioFormNovo">
+      <div class="form-group">
+        <label for="formGroupExampleInput">Descrição</label>
+        <input type="text" formControlName="descricao" class="form-control">
+      </div>
+      <div class="form-group">
+        <hr>
+        <button class="btn btn-success" (click)="saveComentario()">Enviar</button>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn pull-right" aria-label="Close" (click)="modalRef.hide()">
+      FECHAR
+    </button>
+  </div>
+</ng-template>
