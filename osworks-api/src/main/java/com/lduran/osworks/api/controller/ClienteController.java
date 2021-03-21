@@ -1,7 +1,6 @@
 package com.lduran.osworks.api.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -18,10 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lduran.osworks.domain.model.Cliente;
-import com.lduran.osworks.domain.model.Comentario;
 import com.lduran.osworks.domain.model.OrdemServico;
-import com.lduran.osworks.domain.repository.ClienteRepository;
-import com.lduran.osworks.domain.repository.ComentarioRepository;
 import com.lduran.osworks.domain.service.CadastroClienteService;
 import com.lduran.osworks.domain.service.GestaoOrdemServicoService;
 
@@ -36,12 +32,6 @@ import io.swagger.annotations.ApiResponses;
 public class ClienteController
 {
 	@Autowired
-	private ClienteRepository clienteRepository;
-
-	@Autowired
-	private ComentarioRepository comentarioRepository;
-
-	@Autowired
 	private CadastroClienteService cadastroCliente;
 
 	@Autowired
@@ -50,9 +40,9 @@ public class ClienteController
 	@ApiOperation(value = "Retorna uma lista de clientes")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Retorna a lista de clientes") })
 	@RequestMapping(method = RequestMethod.GET, produces = "application/json")
-	public List<Cliente> listar()
+	public ResponseEntity<List<Cliente>> listar()
 	{
-		return this.clienteRepository.findAll();
+		return ResponseEntity.ok(this.cadastroCliente.buscarTodos());
 	}
 
 	@ApiOperation(value = "Busca um cliente pelo id")
@@ -60,50 +50,45 @@ public class ClienteController
 	@RequestMapping(value = "/{clienteId}", method = RequestMethod.GET, produces = "application/json")
 	public ResponseEntity<Cliente> buscar(@PathVariable Long clienteId)
 	{
-		Optional<Cliente> cliente = this.clienteRepository.findById(clienteId);
-		if (cliente.isPresent())
-		{
-			return ResponseEntity.ok(cliente.get());
-		}
-
-		return ResponseEntity.notFound().build();
+		Cliente cliente = this.cadastroCliente.buscar(clienteId);
+		return ResponseEntity.ok(cliente);
 	}
 
 	@ApiOperation(value = "Busca um cliente pelo nome")
 	@GetMapping("/buscando-nome/{nome}")
-	public List<Cliente> buscarPorNome(@PathVariable String nome)
+	public ResponseEntity<List<Cliente>> buscarPorNome(@PathVariable String nome)
 	{
-		return this.clienteRepository.findByNome(nome);
+		return ResponseEntity.ok(this.cadastroCliente.buscarPorNome(nome));
 	}
 
 	@ApiOperation(value = "Busca um cliente pelo nome parcial")
 	@GetMapping("/buscando-nome-parcial/{nome}")
-	public List<Cliente> buscarPorNomeParcial(@PathVariable String nome)
+	public ResponseEntity<List<Cliente>> buscarPorNomeParcial(@PathVariable String nome)
 	{
-		return this.clienteRepository.findByNomeContaining(nome);
+		return ResponseEntity.ok(this.cadastroCliente.buscarPorNomeParcial(nome));
 	}
 
 	@ApiOperation(value = "Busca um cliente pelo e-mail")
 	@GetMapping("/buscando-email/{email}")
-	public Cliente buscarPorEmail(@PathVariable String email)
+	public ResponseEntity<Cliente> buscarPorEmail(@PathVariable String email)
 	{
-		return this.clienteRepository.findByEmail(email);
+		return ResponseEntity.ok(this.cadastroCliente.buscarPorEmail(email));
 	}
 
 	@ApiOperation(value = "Cadastra um novo cliente")
 	@ApiResponses(value = { @ApiResponse(code = 201, message = "Cadastra um cliente novo") })
 	@RequestMapping(method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Cliente adicionar(@Valid @RequestBody Cliente cliente)
+	public ResponseEntity<Cliente> adicionar(@Valid @RequestBody Cliente cliente)
 	{
-		return this.cadastroCliente.salvar(cliente);
+		return ResponseEntity.ok(this.cadastroCliente.salvar(cliente));
 	}
 
 	@ApiOperation(value = "Altera um cliente")
 	@RequestMapping(value = "/{clienteId}", method = RequestMethod.PUT, produces = "application/json", consumes = "application/json")
 	public ResponseEntity<Cliente> atualizar(@Valid @PathVariable Long clienteId, @RequestBody Cliente cliente)
 	{
-		if (!this.clienteRepository.existsById(clienteId))
+		if (!this.cadastroCliente.existe(clienteId))
 		{
 			return ResponseEntity.notFound().build();
 		}
@@ -118,7 +103,7 @@ public class ClienteController
 	@RequestMapping(value = "/{clienteId}", method = RequestMethod.DELETE)
 	public ResponseEntity<Void> remover(@PathVariable Long clienteId)
 	{
-		if (!this.clienteRepository.existsById(clienteId))
+		if (!this.cadastroCliente.existe(clienteId))
 		{
 			return ResponseEntity.notFound().build();
 		}
@@ -126,20 +111,7 @@ public class ClienteController
 		List<OrdemServico> ordensServico = this.gestaoOrdemServicoService.findOrdemServicoByClienteId(clienteId);
 		if (ordensServico != null)
 		{
-			ordensServico.forEach(ordem ->
-			{
-				List<Comentario> comentarios = gestaoOrdemServicoService.findComentarioByOrdemServicoId(ordem.getId());
-				if (comentarios != null)
-				{
-					comentarios.forEach(com ->
-					{
-						comentarioRepository.deleteById(com.getId());
-					});
-				}
-
-				this.gestaoOrdemServicoService.excluir(ordem.getId());
-			});
-
+			ordensServico.forEach(ordem -> this.gestaoOrdemServicoService.excluir(ordem.getId()));
 		}
 
 		this.cadastroCliente.excluir(clienteId);

@@ -1,7 +1,6 @@
 package com.lduran.osworks.api.controller;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -20,10 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lduran.osworks.api.model.OrdemServicoInput;
 import com.lduran.osworks.api.model.OrdemServicoModel;
-import com.lduran.osworks.domain.model.Comentario;
 import com.lduran.osworks.domain.model.OrdemServico;
-import com.lduran.osworks.domain.repository.ComentarioRepository;
-import com.lduran.osworks.domain.repository.OrdemServicoRepository;
 import com.lduran.osworks.domain.service.GestaoOrdemServicoService;
 
 import io.swagger.annotations.ApiOperation;
@@ -37,12 +33,6 @@ import io.swagger.annotations.ApiResponses;
 public class OrdemServicoController
 {
 	@Autowired
-	private OrdemServicoRepository ordemServicoRepository;
-
-	@Autowired
-	private ComentarioRepository comentarioRepository;
-
-	@Autowired
 	private GestaoOrdemServicoService gestaoOrdemServicoService;
 
 	@Autowired
@@ -51,9 +41,9 @@ public class OrdemServicoController
 	@ApiOperation(value = "Retorna uma lista de ordens de serviço")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Retorna uma lista de ordens de serviço") })
 	@RequestMapping(method = RequestMethod.GET, produces = "application/json")
-	public List<OrdemServicoModel> listar()
+	public ResponseEntity<List<OrdemServicoModel>> listar()
 	{
-		return this.toCollectionModel(this.ordemServicoRepository.findAll());
+		return ResponseEntity.ok(this.toCollectionModel(this.gestaoOrdemServicoService.buscarTodas()));
 	}
 
 	@ApiOperation(value = "Busca uma ordem de serviço pelo id")
@@ -61,33 +51,29 @@ public class OrdemServicoController
 	@RequestMapping(value = "/{ordemServicoId}", method = RequestMethod.GET, produces = "application/json")
 	public ResponseEntity<OrdemServicoModel> buscar(@PathVariable Long ordemServicoId)
 	{
-		Optional<OrdemServico> ordemServico = this.ordemServicoRepository.findById(ordemServicoId);
-		if (ordemServico.isPresent())
-		{
-			OrdemServicoModel ordemServicoModel = this.toModel(ordemServico.get());
-			return ResponseEntity.ok(ordemServicoModel);
-		}
-
-		return ResponseEntity.notFound().build();
+		OrdemServico ordemServico = this.gestaoOrdemServicoService.buscar(ordemServicoId);
+		OrdemServicoModel ordemServicoModel = this.toModel(ordemServico);
+		return ResponseEntity.ok(ordemServicoModel);
 	}
 
 	@ApiOperation(value = "Retorna uma lista de ordens de serviço pelo id do cliente")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "Retorna uma lista de ordens de serviço pelo id do cliente") })
 	@RequestMapping(value = "/buscando-por-cliente-id/{clienteId}", method = RequestMethod.GET, produces = "application/json")
-	public List<OrdemServicoModel> buscarPorCLienteId(@PathVariable Long clienteId)
+	public ResponseEntity<List<OrdemServicoModel>> buscarPorCLienteId(@PathVariable Long clienteId)
 	{
-		return this.toCollectionModel(this.gestaoOrdemServicoService.findOrdemServicoByClienteId(clienteId));
+		return ResponseEntity
+				.ok(this.toCollectionModel(this.gestaoOrdemServicoService.findOrdemServicoByClienteId(clienteId)));
 	}
 
 	@ApiOperation(value = "Cadastra uma nova ordem de serviço")
 	@ApiResponses(value = { @ApiResponse(code = 201, message = "Cadastra uma nova ordem de serviço") })
 	@RequestMapping(method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseStatus(HttpStatus.CREATED)
-	public OrdemServicoModel criar(@Valid @RequestBody OrdemServicoInput ordemServicoInput)
+	public ResponseEntity<OrdemServicoModel> criar(@Valid @RequestBody OrdemServicoInput ordemServicoInput)
 	{
 		OrdemServico ordemServico = this.toEntity(ordemServicoInput);
-		return this.toModel(this.gestaoOrdemServicoService.criar(ordemServico));
+		return ResponseEntity.ok(this.toModel(this.gestaoOrdemServicoService.criar(ordemServico)));
 	}
 
 	@ApiOperation(value = "Altera uma ordem de serviço")
@@ -95,47 +81,24 @@ public class OrdemServicoController
 	public ResponseEntity<OrdemServicoModel> atualizar(@Valid @PathVariable Long ordemServicoId,
 			@RequestBody OrdemServicoInput ordemServicoInput)
 	{
-		Optional<OrdemServico> ordemServico = this.ordemServicoRepository.findById(ordemServicoId);
-		if (ordemServico.isPresent())
-		{
-			OrdemServico ordemServicoNova = ordemServico.get();
-			ordemServicoNova.getCliente().setId(ordemServicoInput.getCliente().getId());
-			ordemServicoNova.setDescricao(ordemServicoInput.getDescricao());
-			ordemServicoNova.setPreco(ordemServicoInput.getPreco());
-			ordemServicoNova = this.ordemServicoRepository.save(ordemServicoNova);
-
-			return ResponseEntity.ok(this.toModel(ordemServicoNova));
-		}
-
-		return ResponseEntity.notFound().build();
+		OrdemServico ordemServicoNova = this.gestaoOrdemServicoService.atualizar(ordemServicoId, ordemServicoInput);
+		return ResponseEntity.ok(this.toModel(ordemServicoNova));
 	}
 
 	@ApiOperation(value = "Finaliza uma ordem de serviço")
 	@RequestMapping(value = "/{ordemServicoId}/finalizacao", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void finalizar(@PathVariable Long ordemServicoId)
+	public ResponseEntity<Void> finalizar(@PathVariable Long ordemServicoId)
 	{
 		this.gestaoOrdemServicoService.finalizar(ordemServicoId);
+
+		return ResponseEntity.noContent().build();
 	}
 
 	@ApiOperation(value = "Elimina uma ordem de serviço")
 	@RequestMapping(value = "/{ordemServicoId}", method = RequestMethod.DELETE)
 	public ResponseEntity<Void> remover(@PathVariable Long ordemServicoId)
 	{
-		if (!this.ordemServicoRepository.existsById(ordemServicoId))
-		{
-			return ResponseEntity.notFound().build();
-		}
-
-		List<Comentario> comentarios = gestaoOrdemServicoService.findComentarioByOrdemServicoId(ordemServicoId);
-		if (comentarios != null)
-		{
-			comentarios.forEach(com ->
-			{
-				comentarioRepository.deleteById(com.getId());
-			});
-		}
-
 		this.gestaoOrdemServicoService.excluir(ordemServicoId);
 
 		return ResponseEntity.noContent().build();

@@ -1,7 +1,6 @@
 package com.lduran.osworks.api.controller;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lduran.osworks.api.model.ComentarioInput;
 import com.lduran.osworks.api.model.ComentarioModel;
 import com.lduran.osworks.domain.model.Comentario;
-import com.lduran.osworks.domain.repository.ComentarioRepository;
 import com.lduran.osworks.domain.service.GestaoOrdemServicoService;
 
 import io.swagger.annotations.ApiOperation;
@@ -35,9 +33,6 @@ import io.swagger.annotations.ApiResponses;
 public class ComentarioController
 {
 	@Autowired
-	private ComentarioRepository comentarioRepository;
-
-	@Autowired
 	private GestaoOrdemServicoService gestaoOrdemServicoService;
 
 	@Autowired
@@ -46,39 +41,40 @@ public class ComentarioController
 	@ApiOperation(value = "Retorna uma lista de comentários")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Retorna a lista de comentários") })
 	@RequestMapping(method = RequestMethod.GET, produces = "application/json")
-	public List<ComentarioModel> listar(@PathVariable Long ordemServicoId)
+	public ResponseEntity<List<ComentarioModel>> listar(@PathVariable Long ordemServicoId)
 	{
-		List<Comentario> comentarios = this.comentarioRepository.findAll().stream()
-				.filter(comentario -> comentario.getOrdemServico().getId().equals(ordemServicoId))
-				.collect(Collectors.toList());
-
-		return this.toCollectionModel(comentarios);
+		List<Comentario> comentarios = this.gestaoOrdemServicoService.buscarTodosComentariosDaOrdem(ordemServicoId);
+		return ResponseEntity.ok(this.toCollectionModel(comentarios));
 	}
 
 	@ApiOperation(value = "Busca um comentário")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Retorna um comentário") })
 	@RequestMapping(value = "/{comentarioId}", method = RequestMethod.GET, produces = "application/json")
-	public ResponseEntity<ComentarioModel> buscar(@PathVariable Long comentarioId)
+	public ResponseEntity<ComentarioModel> buscar(@PathVariable Long ordemServicoId, @PathVariable Long comentarioId)
 	{
-		Optional<Comentario> comentario = this.comentarioRepository.findById(comentarioId);
-		if (comentario.isPresent())
-		{
-			return ResponseEntity.ok(this.toModel(comentario.get()));
-		}
-
-		return ResponseEntity.notFound().build();
+		Comentario comentario = this.gestaoOrdemServicoService.buscarComentario(ordemServicoId, comentarioId);
+		return ResponseEntity.ok(this.toModel(comentario));
 	}
 
 	@ApiOperation(value = "Cadastra um novo comentário")
 	@ApiResponses(value = { @ApiResponse(code = 201, message = "Comentário novo cadastrado") })
 	@RequestMapping(method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ComentarioModel adicionar(@PathVariable Long ordemServicoId,
+	public ResponseEntity<ComentarioModel> adicionar(@PathVariable Long ordemServicoId,
 			@Valid @RequestBody ComentarioInput comentarioInput)
 	{
 		Comentario comentario = this.gestaoOrdemServicoService.adicionarComentario(ordemServicoId,
 				comentarioInput.getDescricao());
-		return this.toModel(comentario);
+		return ResponseEntity.ok(this.toModel(comentario));
+	}
+
+	@ApiOperation(value = "Elimina um comentário")
+	@RequestMapping(value = "/{comentarioId}", method = RequestMethod.DELETE)
+	public ResponseEntity<Void> remover(@PathVariable Long comentarioId)
+	{
+		this.gestaoOrdemServicoService.excluirComentario(comentarioId);
+
+		return ResponseEntity.noContent().build();
 	}
 
 	private ComentarioModel toModel(Comentario comentario)

@@ -2,11 +2,13 @@ package com.lduran.osworks.domain.service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.lduran.osworks.api.model.OrdemServicoInput;
 import com.lduran.osworks.domain.exception.EntidadeNaoEncontradaException;
 import com.lduran.osworks.domain.exception.NegocioException;
 import com.lduran.osworks.domain.model.Cliente;
@@ -29,6 +31,40 @@ public class GestaoOrdemServicoService
 	@Autowired
 	private ComentarioRepository comentarioRepository;
 
+	public List<OrdemServico> buscarTodas()
+	{
+		return this.ordemServicoRepository.findAll();
+	}
+
+	public OrdemServico buscar(Long ordemServicoId)
+	{
+		return this.ordemServicoRepository.findById(ordemServicoId)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException("Ordem de Serviço não encontrada."));
+	}
+
+	public List<Comentario> buscarTodosComentariosDaOrdem(Long ordemServicoId)
+	{
+		List<Comentario> comentarios = this.comentarioRepository.findAll().stream()
+				.filter(comentario -> comentario.getOrdemServico().getId().equals(ordemServicoId))
+				.collect(Collectors.toList());
+
+		return comentarios;
+	}
+
+	public Comentario buscarComentario(Long ordemServicoId, Long comentarioId)
+	{
+		List<Comentario> comentarios = buscarTodosComentariosDaOrdem(ordemServicoId);
+		comentarios = comentarios.stream().filter(c -> c.getId().equals(comentarioId))
+				.collect(Collectors.<Comentario>toList());
+
+		if (comentarios.isEmpty())
+		{
+			throw new EntidadeNaoEncontradaException("Comentário não encontrado.");
+		}
+
+		return comentarios.get(0);
+	}
+
 	public OrdemServico criar(OrdemServico ordemServico)
 	{
 		Cliente cliente = buscarCliente(ordemServico.getCliente().getId());
@@ -40,9 +76,42 @@ public class GestaoOrdemServicoService
 		return this.ordemServicoRepository.save(ordemServico);
 	}
 
+	public OrdemServico atualizar(Long ordemServicoId, OrdemServicoInput ordemServicoInput)
+	{
+		Optional<OrdemServico> ordemServico = this.ordemServicoRepository.findById(ordemServicoId);
+		if (ordemServico.isPresent())
+		{
+			OrdemServico ordemServicoNova = ordemServico.get();
+			ordemServicoNova.getCliente().setId(ordemServicoInput.getCliente().getId());
+			ordemServicoNova.setDescricao(ordemServicoInput.getDescricao());
+			ordemServicoNova.setPreco(ordemServicoInput.getPreco());
+			ordemServicoNova = this.ordemServicoRepository.save(ordemServicoNova);
+
+			return ordemServicoNova;
+		}
+		else
+		{
+			throw new EntidadeNaoEncontradaException("Ordem de Serviço não encontrada.");
+		}
+	}
+
 	public void excluir(Long ordemServicoId)
 	{
+		List<Comentario> comentarios = findComentarioByOrdemServicoId(ordemServicoId);
+		if (comentarios != null)
+		{
+			comentarios.forEach(com ->
+			{
+				comentarioRepository.deleteById(com.getId());
+			});
+		}
+
 		this.ordemServicoRepository.deleteById(ordemServicoId);
+	}
+
+	public void excluirComentario(Long comentarioId)
+	{
+		comentarioRepository.deleteById(comentarioId);
 	}
 
 	public void finalizar(Long ordemServicoId)
@@ -84,12 +153,6 @@ public class GestaoOrdemServicoService
 
 		return comentarios.stream().filter(comentario -> comentario.getOrdemServico().equals(ordemServico))
 				.collect(Collectors.toList());
-	}
-
-	private OrdemServico buscar(Long ordemServicoId)
-	{
-		return this.ordemServicoRepository.findById(ordemServicoId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException("Ordem de Serviço não encontrada."));
 	}
 
 	private Cliente buscarCliente(Long clienteId)
