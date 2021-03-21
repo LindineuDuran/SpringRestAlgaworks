@@ -17,7 +17,7 @@ Desenvolvimento de uma Spring REST para Iniciantes
                <li>Continuando a desenvolver a REST API e aprendendo técnicas e boas práticas para facilitar a manutenção da API e evitar alguns problemas no futuro.</li>
           </ul>
 	</li>
-     <li>[Documentando a API Spring Boot com o Swagger](https://www.treinaweb.com.br/blog/documentando-uma-api-spring-boot-com-o-swagger/)
+     <li>Documentando a API Spring Boot com o Swagger - https://www.treinaweb.com.br/blog/documentando-uma-api-spring-boot-com-o-swagger/
           <ul>
                <li>O Swagger é uma aplicação open source que auxilia os desenvolvedores a definir, criar, documentar e consumir APIs REST;</li>
 	       <li>Customizando o Swagger na aplicação Spring Boot;</li>
@@ -25,7 +25,7 @@ Desenvolvimento de uma Spring REST para Iniciantes
 	       <li>Descrevendo a API no Swagger;</li>
           </ul>
      </li>
-     <li>[Setting Up Swagger 2 with a Spring REST API](https://www.baeldung.com/swagger-2-documentation-for-spring-rest-api)
+     <li>Setting Up Swagger 2 with a Spring REST API - https://www.baeldung.com/swagger-2-documentation-for-spring-rest-api
           <ul>
                <li>Adding the Maven Dependency;</li>
 	       <li>Spring Boot Dependency;</li>
@@ -33,13 +33,12 @@ Desenvolvimento de uma Spring REST para Iniciantes
 	       <li>Exploring Swagger Documentation;</li>
           </ul>
      </li>
-     <li>[Using Docker from Maven and Maven from Docker](https://codefresh.io/howtos/using-docker-maven-maven-docker/)</li>
+     <li>Using Docker from Maven and Maven from Docker - https://codefresh.io/howtos/using-docker-maven-maven-docker/</li>
      <li>Como Dockerizar o aplicativo Angular
           <ul>
-               <li>[Curso Angular #147: Build de Produção + Suporte ao Internet Explorer](https://www.youtube.com/watch?v=6fZRJCf33wM&ab_channel=LoianeGroner)</li>
-	       <li>[Curso Angular #150: Gerando Imagem Docker com Build de Produção](https://www.youtube.com/watch?v=iPazv9x7g0g&t=880s&ab_channel=LoianeGroner)</li>
-	       <li>[DanWahlin/Angular-Core-Concepts](https://github.com/DanWahlin/Angular-Core-Concepts/blob/master/config/nginx.conf)</li>
-	       <li>Exploring Swagger Documentation;</li>
+               <li>Curso Angular #147: Build de Produção + Suporte ao Internet Explorer - https://www.youtube.com/watch?v=6fZRJCf33wM&ab_channel=LoianeGroner</li>
+	       <li>Curso Angular #150: Gerando Imagem Docker com Build de Produção - https://www.youtube.com/watch?v=iPazv9x7g0g&t=880s&ab_channel=LoianeGroner</li>
+	       <li>DanWahlin/Angular-Core-Concepts - https://github.com/DanWahlin/Angular-Core-Concepts/blob/master/config/nginx.conf</li>
           </ul>
      </li>
 </ul>
