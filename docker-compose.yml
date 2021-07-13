@@ -1,21 +1,6 @@
 version: "3.8"
 
 services:
-  mysql:
-    image: mysql:5.7
-    ports:
-      - "3306:3306"
-    restart: always
-    environment:
-      MYSQL_USER: root
-      MYSQL_PASSWORD: VCK4AGzFOnc@
-      MYSQL_ROOT_PASSWORD: VCK4AGzFOnc@
-      MYSQL_DATABASE: osworks
-    volumes: 
-      - mysql-database-data-volume:/var/lib/mysql
-    networks:
-      - mysqlNET
-
   osworks-api:
     image: lduran355/osworks-api:0.0.1-SNAPSHOT
     ports:
@@ -26,13 +11,28 @@ services:
     environment:
       RDS_HOSTNAME: mysql
       RDS_PORT: 3306
-      MYSQL_USER: root
-      MYSQL_PASSWORD: VCK4AGzFOnc@
-      MYSQL_ROOT_PASSWORD: VCK4AGzFOnc@
-      MYSQL_DATABASE: osworks
+      RDS_DB_NAME: osworks
+      RDS_USERNAME: todos-user
+      RDS_PASSWORD: dummytodos
     networks:
       - mysqlNET
       
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: dummypassword 
+      MYSQL_USER: todos-user
+      MYSQL_PASSWORD: dummytodos
+      MYSQL_DATABASE: osworks
+    volumes: 
+      - mysql-database-data-volume:/var/lib/mysql
+    networks:
+      - mysqlNET
+
   osworks-front-end:
     image: lduran355/osworks-front-end:latest
     container_name: osworks-front-end
